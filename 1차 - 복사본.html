@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoodLaw - Updated with Editable Standards</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .section {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .section.active {
+      display: block;
+      opacity: 1;
+    }
+    .chart-bar {
+      height: 20px;
+      margin: 5px 0;
+      border-radius: 4px;
+      position: relative;
+    }
+    .chart-bar.na { background-color: #10b981; width: 60%; }
+    .chart-bar.sugar { background-color: #ef4444; width: 80%; }
+    .chart-bar.cal { background-color: #3b82f6; width: 50%; }
+    .chart-bar:hover::after {
+      content: attr(data-label);
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1f2937;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .transition-all {
+      transition: all 0.3s ease;
+    }
+    .spreadsheet-table input {
+      width: 100%;
+      padding: 6px;
+      border: none;
+      outline: none;
+      text-align: center;
+      font-size: 14px;
+    }
+    .spreadsheet-table input:focus {
+      box-shadow: inset 0 0 0 2px #3b82f6;
+    }
+    .spreadsheet-table th, .spreadsheet-table td {
+      border: 1px solid #d1d5db;
+      padding: 0;
+    }
+    .spreadsheet-table th {
+      background-color: #e5e7eb;
+      padding: 8px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .spreadsheet-table td:hover {
+      background-color: #f9fafb;
+    }
+    .spreadsheet-table .total-row {
+      background-color: #f3f4f6;
+      font-weight: 600;
+    }
+    .spreadsheet-table-container {
+      overflow-x: auto;
+    }
+    button {
+      transform: scale(1);
+      transition: transform 0.1s ease;
+    }
+    button:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <!-- 대시보드 -->
+  <div id="dashboard" class="section active">
+    <header class="bg-white shadow-sm p-4 flex justify-between items-center">
+      <div class="text-2xl font-bold text-blue-600 drop-shadow-sm">[로고: FoodLaw]</div>
+      <nav class="space-x-4" id="nav-buttons">
+        <a href="#" onclick="showSection('profilePage')" class="text-gray-600 hover:text-blue-600 hover:underline">프로필</a>
+        <a href="#" id="authButton" onclick="logout()" class="text-gray-600 hover:text-blue-600 hover:underline">로그아웃</a>
+      </nav>
+      
+    </header>
+
+    <main class="max-w-7xl mx-auto p-6">
+        <!-- 법령 업데이트 알림 섹션 -->
+    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg mb-6 flex justify-between items-center shadow-sm">
+    <div>
+      <strong>[법령 업데이트]</strong> 식품위생법 개정: 나트륨 기준 강화
+    </div>
+    <a href="#" onclick="showSection('lawUpdates')" class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-all">자세히</a>    
+  </div>
+  
+      <div class="mb-6">
+        <input type="text" placeholder="재료 또는 제품 검색..." 
+               class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm">
+      </div>
+
+      <div class="mb-6 flex space-x-4">
+        <button onclick="showSection('input')" 
+                class="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-6 py-2 rounded-lg hover:from-blue-600 hover:to-blue-800 transition-all flex items-center">
+          <i class="fas fa-plus mr-2"></i> 새 제품 등록
+        </button>
+        <button class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-all flex items-center">
+          <i class="fas fa-search mr-2"></i> 기존 제품 조회
+        </button>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold mb-4">최근 작업</h3>
+        <table class="w-full text-left">
+          <tbody>
+            <tr class="border-b hover:bg-gray-50">
+              <td class="py-2">제품명: 콩국수 밀키트</td>
+              <td class="py-2">상태: 분석 완료</td>
+              <td class="py-2"><button class="text-blue-600 hover:underline">보기</button></td>
+            </tr>
+            <tr class="border-b hover:bg-gray-50">
+              <td class="py-2">제품명: 저당 스무디</td>
+              <td class="py-2">상태: 작성 중</td>
+              <td class="py-2"><button class="text-blue-600 hover:underline">이어하기</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+
+    <footer class="bg-white mt-6 p-4 text-center text-gray-600">
+      회사 정보 | 문의 | 이용약관
+    </footer>
+  </div>
+
+  <!-- 재료/영양성분 입력 -->
+  <div id="input" class="section">
+    <header class="bg-white shadow-sm p-4 flex justify-between items-center">
+      <div class="text-2xl font-bold text-blue-600 drop-shadow-sm">[로고: FoodLaw]</div>
+      <div class="text-gray-600">
+        <span class="font-semibold text-blue-600">입력</span> > 분석 > 결과
+      </div>
+      <div class="space-x-2">
+        <button class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-all flex items-center">
+          <i class="fas fa-save mr-2"></i> 저장
+        </button>
+        <button onclick="showSection('dashboard')" 
+                class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all flex items-center">
+          <i class="fas fa-times mr-2"></i> 취소
+        </button>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-6">
+      <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4">제품 정보</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label class="block">
+            제품명:
+            <input type="text" value="콩국수 밀키트" 
+                   class="w-full p-2 mt-1 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm">
+          </label>
+          <label class="block">
+            제품 유형:
+            <select class="w-full p-2 mt-1 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm">
+              <option>두류가공품</option>
+              <option>음료</option>
+              <option>과자</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4">성분(재료) 입력</h3>
+        <div class="spreadsheet-table-container">
+          <table class="spreadsheet-table w-full">
+            <thead>
+              <tr>
+                <th>재료명</th>
+                <th>업체명</th>
+                <th>단가 (원/g)</th>
+                <th>수율 (%)</th>
+                <th>수율단가 (원/g)</th>
+                <th>중량 (g)</th>
+                <th>배합비 (%)</th>
+                <th>원재료비</th>
+                <th>원가율 (%)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="text" value="콩국"></td>
+                <td><input type="text" value=""></td>
+                <td><input type="text" value="2450.00"></td>
+                <td><input type="text" value="98.0"></td>
+                <td><input type="text" value="2500.00"></td>
+                <td><input type="text" value="120.0"></td>
+                <td><input type="text" value="74.10"></td>
+                <td><input type="text" value="300000.0"></td>
+                <td><input type="text" value=""></td>
+              </tr>
+              <tr>
+                <td><input type="text" value="소면"></td>
+                <td><input type="text" value=""></td>
+                <td><input type="text" value="700.00"></td>
+                <td><input type="text" value="98.0"></td>
+                <td><input type="text" value="714.29"></td>
+                <td><input type="text" value="15.0"></td>
+                <td><input type="text" value="21.20"></td>
+                <td><input type="text" value="10714.3"></td>
+                <td><input type="text" value=""></td>
+              </tr>
+              <tr>
+                <td><input type="text" value="오이"></td>
+                <td><input type="text" value=""></td>
+                <td><input type="text" value="80.00"></td>
+                <td><input type="text" value="98.0"></td>
+                <td><input type="text" value="81.63"></td>
+                <td><input type="text" value="50.0"></td>
+                <td><input type="text" value="4.20"></td>
+                <td><input type="text" value="4081.6"></td>
+                <td><input type="text" value=""></td>
+              </tr>
+              <tr>
+                <td><input type="text" value="땅콩분태"></td>
+                <td><input type="text" value=""></td>
+                <td><input type="text" value="110.00"></td>
+                <td><input type="text" value="98.0"></td>
+                <td><input type="text" value="112.24"></td>
+                <td><input type="text" value="20.0"></td>
+                <td><input type="text" value="0.50"></td>
+                <td><input type="text" value="2244.9"></td>
+                <td><input type="text" value=""></td>
+              </tr>
+              <tr class="total-row">
+                <td>합계</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><input type="text" value="205.0" readonly></td>
+                <td><input type="text" value="100.0" readonly></td>
+                <td><input type="text" value="317040.8" readonly></td>
+                <td><input type="text" value="100.0" readonly></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-4 flex space-x-2">
+          <button class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-all flex items-center">
+            <i class="fas fa-plus mr-2"></i> 행 추가
+          </button>
+          <button class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all flex items-center">
+            <i class="fas fa-trash mr-2"></i> 행 삭제
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4">영양성분 입력</h3>
+        <div class="spreadsheet-table-container">
+          <table class="spreadsheet-table w-full">
+            <thead>
+              <tr>
+                <th></th>
+                <th>재료명</th>
+                <th>제품 배합비 (%)</th>
+                <th>나트륨 (mg)</th>
+                <th>탄수화물 (g)</th>
+                <th>당류 (g)</th>
+                <th>지방 (g)</th>
+                <th>트랜스지방 (g)</th>
+                <th>포화지방 (g)</th>
+                <th>콜레스테롤 (mg)</th>
+                <th>단백질 (g)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td rowspan="4" class="text-center font-semibold">100g 당</td>
+                <td><input type="text" value="콩국물(무농약)"></td>
+                <td><input type="text" value="74.10"></td>
+                <td><input type="text" value="155.00"></td>
+                <td><input type="text" value="3.74"></td>
+                <td><input type="text" value="0.91"></td>
+                <td><input type="text" value="2.57"></td>
+                <td><input type="text" value="0.01"></td>
+                <td><input type="text" value="0.35"></td>
+                <td><input type="text" value="0.00"></td>
+                <td><input type="text" value="4.84"></td>
+              </tr>
+              <tr>
+                <td><input type="text" value="오뚜기 옛날 국수 소면"></td>
+                <td><input type="text" value="21.20"></td>
+                <td><input type="text" value="1530.00"></td>
+                <td><input type="text" value="69.00"></td>
+                <td><input type="text" value="7.00"></td>
+                <td><input type="text" value="3.00"></td>
+                <td><input type="text" value=""></td>
+                <td><input type="text" value="1.00"></td>
+                <td><input type="text" value="0.00"></td>
+                <td><input type="text" value="9.00"></td>
+              </tr>
+              <tr>
+                <td><input type="text" value="오이"></td>
+                <td><input type="text" value="4.20"></td>
+                <td><input type="text" value="2.00"></td>
+                <td><input type="text" value="2.55"></td>
+                <td><input type="text" value="1.77"></td>
+                <td><input type="text" value="0.04"></td>
+                <td><input type="text" value="0.00"></td>
+                <td><input type="text" value="0.01"></td>
+                <td><input type="text" value="0.00"></td>
+                <td><input type="text" value="0.95"></td>
+              </tr>
+              <tr>
+                <td><input type="text" value="볶음땅콩분태"></td>
+                <td><input type="text" value="0.50"></td>
+                <td><input type="text" value="0.00"></td>
+                <td><input type="text" value="20.00"></td>
+                <td><input type="text" value="5.00"></td>
+                <td><input type="text" value="46.00"></td>
+                <td><input type="text" value="0.00"></td>
+                <td><input type="text" value="8.50"></td>
+                <td><input type="text" value="0.00"></td>
+                <td><input type="text" value="28.00"></td>
+              </tr>
+              <tr>
+                <td rowspan="4" class="text-center font-semibold">배합비 적용</td>
+                <td><input type="text" value="콩국물(무농약)"></td>
+                <td><input type="text" value=""></td>
+                <td><input type="text" value="114.86"></td>
+                <td><input type="text" value="2.77"></td>
+                <td><input type="text" value="0.67"></td>
+                <td><input type="text" value="1.90"></td>
+                <td><input type="text" value="0.01"></td>
+                <td><input type="text" value="0.26"></td>
+                <td><input type="text" value="0.00"></td>
+                <td><input type="text" value="3.59"></td>
+              </tr>
+              <tr>
+                <td><input type="text" value="오뚜기 옛날 국수 소면"></td>
+                <td><input type="text" value=""></td>
+                <td><input type="text" value="324.36"></td>
+                <td><input type="text" value="14.63"></td>
+                <td><input type="text" value="1.48"></td>
+                <td><input type="text" value="0.64"></td>
+                <td><input type="text" value="0.00"></td>
+                <td><input type="text" value="0.21"></td>
+                <td><input type="text" value="0.00"></td>
+                <td><input type="text" value="1.91"></td>
+              </tr>
+              <tr>
+                <td><input type="text" value="오이"></td>
+                <td><input type="text" value=""></td>
+                <td><input type="text" value="0.08"></td>
+                <td><input type="text" value="0.11"></td>
+                <td><input type="text" value="0.07"></td>
+                <td><input type="text" value="0.00"></td>
+                <td><input type="text" value="0.00"></td>
+                <td><input type="text" value="0.00"></td>
+                <td><input type="text" value="0.00"></td>
+                <td><input type="text" value="0.04"></td>
+              </tr>
+              <tr>
+                <td><input type="text" value="볶음땅콩분태"></td>
+                <td><input type="text" value=""></td>
+                <td><input type="text" value="0.00"></td>
+                <td><input type="text" value="0.10"></td>
+                <td><input type="text" value="0.03"></td>
+                <td><input type="text" value="0.23"></td>
+                <td><input type="text" value="0.00"></td>
+                <td><input type="text" value="0.04"></td>
+                <td><input type="text" value="0.00"></td>
+                <td><input type="text" value="0.14"></td>
+              </tr>
+              <tr class="total-row">
+                <td colspan="2">제품 100g 당 함량</td>
+                <td></td>
+                <td><input type="text" value="439.30" readonly></td>
+                <td><input type="text" value="17.61" readonly></td>
+                <td><input type="text" value="2.26" readonly></td>
+                <td><input type="text" value="2.77" readonly></td>
+                <td><input type="text" value="0.01" readonly></td>
+                <td><input type="text" value="0.51" readonly></td>
+                <td><input type="text" value="0.00" readonly></td>
+                <td><input type="text" value="5.67" readonly></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-4 flex space-x-2">
+          <button class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-all flex items-center">
+            <i class="fas fa-plus mr-2"></i> 행 추가
+          </button>
+          <button class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all flex items-center">
+            <i class="fas fa-trash mr-2"></i> 행 삭제
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4">표시사항 작성</h3>
+        <div class="spreadsheet-table-container">
+          <table class="spreadsheet-table w-full">
+            <thead>
+              <tr>
+                <th>번호</th>
+                <th>재료명</th>
+                <th>배합비 (%)</th>
+                <th>중량 (g)</th>
+                <th>식품유형</th>
+                <th>원산지</th>
+                <th>알레르기 함유</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-center">1</td>
+                <td><input type="text" value="강릉초당두부 콩국물(무농약)"></td>
+                <td><input type="text" value="74.10"></td>
+                <td><input type="text" value="370.5"></td>
+                <td><input type="text" value="두류가공품"></td>
+                <td><input type="text" value=""></td>
+                <td><input type="text" value="대두"></td>
+              </tr>
+              <tr>
+                <td class="text-center">2</td>
+                <td><input type="text" value="오뚜기 옛날 국수 소면"></td>
+                <td><input type="text" value="21.20"></td>
+                <td><input type="text" value="106"></td>
+                <td><input type="text" value="건면"></td>
+                <td><input type="text" value=""></td>
+                <td><input type="text" value="밀"></td>
+              </tr>
+              <tr>
+                <td class="text-center">3</td>
+                <td><input type="text" value="오이"></td>
+                <td><input type="text" value="4.20"></td>
+                <td><input type="text" value="21"></td>
+                <td><input type="text" value="농산물"></td>
+                <td><input type="text" value="국산"></td>
+                <td><input type="text" value=""></td>
+              </tr>
+              <tr>
+                <td class="text-center">4</td>
+                <td><input type="text" value="볶음땅콩분태"></td>
+                <td><input type="text" value="0.50"></td>
+                <td><input type="text" value="2.5"></td>
+                <td><input type="text" value="견과류가공품"></td>
+                <td><input type="text" value="중국산"></td>
+                <td><input type="text" value="땅콩"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-4 flex space-x-2">
+          <button class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-all flex items-center">
+            <i class="fas fa-plus mr-2"></i> 행 추가
+          </button>
+          <button class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all flex items-center">
+            <i class="fas fa-trash mr-2"></i> 행 삭제
+          </button>
+        </div>
+      </div>
+
+      <div class="text-center flex justify-center space-x-4">
+        <button onclick="showSection('result')" 
+                class="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-blue-800 transition-all flex items-center">
+          <i class="fas fa-arrow-right mr-2"></i> 분석 시작
+        </button>
+        <button onclick="showSection('standards')" 
+                class="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-blue-800 transition-all flex items-center">
+          <i class="fas fa-cogs mr-2"></i> 제품질관리규격화
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <!-- 제품질관리규격화 -->
+  <div id="standards" class="section">
+    <header class="bg-white shadow-sm p-4 flex justify-between items-center">
+      <div class="text-2xl font-bold text-blue-600 drop-shadow-sm">[로고: FoodLaw]</div>
+      <div class="text-gray-600">
+        입력 > <span class="font-semibold text-blue-600">제품질관리규격화</span>
+      </div>
+      <div class="space-x-2">
+        <button class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-all flex items-center">
+          <i class="fas fa-save mr-2"></i> 저장
+        </button>
+        <button onclick="showSection('input')" 
+                class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all flex items-center">
+          <i class="fas fa-arrow-left mr-2"></i> 입력으로 돌아가기
+        </button>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-6">
+      <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4">1. 배합비</h3>
+        <div class="spreadsheet-table-container">
+          <table class="spreadsheet-table w-full">
+            <thead>
+              <tr>
+                <th>원료명</th>
+                <th>배합비 (%)</th>
+                <th>중량 (g)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="text" value="콩국"></td>
+                <td><input type="text" value="74.1"></td>
+                <td><input type="text" value="700.0"></td>
+              </tr>
+              <tr>
+                <td><input type="text" value="소면"></td>
+                <td><input type="text" value="21.2"></td>
+                <td><input type="text" value="200.0"></td>
+              </tr>
+              <tr>
+                <td><input type="text" value="오이"></td>
+                <td><input type="text" value="4.2"></td>
+                <td><input type="text" value="40.0"></td>
+              </tr>
+              <tr>
+                <td><input type="text" value="땅콩분태"></td>
+                <td><input type="text" value="0.5"></td>
+                <td><input type="text" value="5.0"></td>
+              </tr>
+              <tr class="total-row">
+                <td>합계</td>
+                <td><input type="text" value="100.0" readonly></td>
+                <td><input type="text" value="945.0" readonly></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-4 flex space-x-2">
+          <button class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-all flex items-center">
+            <i class="fas fa-plus mr-2"></i> 행 추가
+          </button>
+          <button class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all flex items-center">
+            <i class="fas fa-trash mr-2"></i> 행 삭제
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4">2. 제품규격</h3>
+        <div class="spreadsheet-table-container">
+          <table class="spreadsheet-table w-full">
+            <thead>
+              <tr>
+                <th>분류</th>
+                <th>항목</th>
+                <th>기준</th>
+                <th>관리규격</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="text" value="성상"></td>
+                <td><input type="text" value="식품유형"></td>
+                <td><input type="text" value="호상가공식품→기타 분말가공품→두류가공품"></td>
+                <td><input type="text" value="범칙"></td>
+              </tr>
+              <tr>
+                <td><input type="text" value="성상"></td>
+                <td><input type="text" value="성상"></td>
+                <td><input type="text" value="고유의 형태, 색택을 가지고 이물이 없어야 한다."></td>
+                <td><input type="text" value="범칙"></td>
+              </tr>
+              <tr>
+                <td><input type="text" value="성상"></td>
+                <td><input type="text" value="이물"></td>
+                <td><input type="text" value="이물을 함유하여서는 아니된다."></td>
+                <td><input type="text" value="범칙"></td>
+              </tr>
+              <tr>
+                <td><input type="text" value="성상"></td>
+                <td><input type="text" value="대장균군"></td>
+                <td><input type="text" value="n=5, c=1, m=0, M=10"></td>
+                <td><input type="text" value="범칙"></td>
+              </tr>
+              <tr>
+                <td><input type="text" value="성상"></td>
+                <td><input type="text" value="보존조건"></td>
+                <td><input type="text" value="냉장(0~10℃)에서 보존하여야 한다."></td>
+                <td><input type="text" value="관리"></td>
+              </tr>
+              <tr>
+                <td><input type="text" value="성상"></td>
+                <td><input type="text" value="나트륨"></td>
+                <td><input type="text" value="945 ± 15"></td>
+                <td><input type="text" value="사유사항 시험검사 1차 실시, 내부식품 사유사항 시험검사 1차 실시, 내부식품 사유사항 관리기준"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-4 flex space-x-2">
+          <button class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-all flex items-center">
+            <i class="fas fa-plus mr-2"></i> 행 추가
+          </button>
+          <button class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all flex items-center">
+            <i class="fas fa-trash mr-2"></i> 행 삭제
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4">3. 원료규격</h3>
+        <div class="spreadsheet-table-container">
+          <table class="spreadsheet-table w-full">
+            <thead>
+              <tr>
+                <th>분류</th>
+                <th>항목</th>
+                <th>기준</th>
+                <th>관리규격</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="text" value="성상"></td>
+                <td><input type="text" value="식품유형"></td>
+                <td><input type="text" value="식품→식품원료→자사투입→부산과 과채류"></td>
+                <td><input type="text" value="범칙"></td>
+              </tr>
+              <tr>
+                <td><input type="text" value="성상"></td>
+                <td><input type="text" value="성상"></td>
+                <td><input type="text" value="고유의 형태, 색택을 가지고 이물이 없어야 한다."></td>
+                <td><input type="text" value="범칙"></td>
+              </tr>
+              <tr>
+                <td><input type="text" value="성상"></td>
+                <td><input type="text" value="이물"></td>
+                <td><input type="text" value="이물을 함유하여서는 아니된다."></td>
+                <td><input type="text" value="범칙"></td>
+              </tr>
+              <tr>
+                <td><input type="text" value="성상"></td>
+                <td><input type="text" value="대장균군"></td>
+                <td><input type="text" value="n=5, c=1, m=0, M=10"></td>
+                <td><input type="text" value="범칙"></td>
+              </tr>
+              <tr>
+                <td><input type="text" value="성상"></td>
+                <td><input type="text" value="카드뮴(mg/kg)"></td>
+                <td><input type="text" value="0.1 이하"></td>
+                <td><input type="text" value="범칙"></td>
+              </tr>
+              <tr>
+                <td><input type="text" value="성상"></td>
+                <td><input type="text" value="보존조건"></td>
+                <td><input type="text" value="냉장(0~10℃)에서 보존하여야 한다."></td>
+                <td><input type="text" value="관리"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-4 flex space-x-2">
+          <button class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-all flex items-center">
+            <i class="fas fa-plus mr-2"></i> 행 추가
+          </button>
+          <button class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all flex items-center">
+            <i class="fas fa-trash mr-2"></i> 행 삭제
+          </button>
+        </div>
+      </div>
+
+      <div class="flex justify-center space-x-4">
+        <button onclick="showSection('input')" 
+                class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-all flex items-center">
+          <i class="fas fa-arrow-left mr-2"></i> 입력으로 돌아가기
+        </button>
+        <button onclick="showSection('dashboard')" 
+                class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-all flex items-center">
+          <i class="fas fa-home mr-2"></i> 홈으로
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <!-- 결과 출력 -->
+  <div id="result" class="section">
+    <header class="bg-white shadow-sm p-4 flex justify-between items-center">
+      <div class="text-2xl font-bold text-blue-600 drop-shadow-sm">[로고: FoodLaw]</div>
+      <div class="text-gray-600">
+        입력 > 분석 > <span class="font-semibold text-blue-600">결과</span>
+      </div>
+      <div class="space-x-2">
+        <button class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-all flex items-center">
+          <i class="fas fa-save mr-2"></i> 저장
+        </button>
+        <button onclick="showSection('input')" 
+                class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all flex items-center">
+          <i class="fas fa-edit mr-2"></i> 수정
+        </button>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-6">
+      <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4">법령 준수 상태</h3>
+        <div class="space-y-2">
+          <div class="flex items-center">
+            <span class="w-24">나트륨:</span>
+            <div class="chart-bar na" data-label="500mg (기준 충족)"></div>
+            <span class="ml-2">500mg (기준 충족) <i class="fas fa-check text-green-500"></i></span>
+          </div>
+          <div class="flex items-center">
+            <span class="w-24">설탕:</span>
+            <div class="chart-bar sugar" data-label="15g (저당 기준 초과)"></div>
+            <span class="ml-2">15g (저당 기준 초과) <i class="fas fa-exclamation-triangle text-red-500"></i></span>
+          </div>
+          <div class="flex items-center">
+            <span class="w-24">칼로리:</span>
+            <div class="chart-bar cal" data-label="200kcal (기준 충족)"></div>
+            <span class="ml-2">200kcal (기준 충족) <i class="fas fa-check text-green-500"></i></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4">법령 정보</h3>
+        <p>법령: 식품위생법 시행규칙 제XX조 <a href="#" class="text-blue-600 hover:underline">상세 보기</a></p>
+        <p>기준: 두류가공품, 대장균군 음성, 설탕 10g 이하</p>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4">권고사항</h3>
+        <ul class="list-disc pl-5">
+          <li>설탕 함량을 5g 줄이면 저당 표기 가능</li>
+          <li>대체: 설탕 → 에리스리톨 (칼로리 55kcal 감소)</li>
+        </ul>
+      </div>
+
+      <div class="flex justify-center space-x-4">
+        <button class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-all flex items-center">
+          <i class="fas fa-download mr-2"></i> PDF 다운로드
+        </button>
+        <button onclick="showSection('dashboard')" 
+                class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-all flex items-center">
+          <i class="fas fa-home mr-2"></i> 홈으로
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <!-- 법령 업데이트 알림 페이지 -->
+<div id="lawUpdates" class="section">
+    <header class="bg-white shadow-sm p-4 flex justify-between items-center">
+      <div class="text-2xl font-bold text-blue-600 drop-shadow-sm">[로고: FoodLaw]</div>
+      <button onclick="showSection('dashboard')" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-all">
+        ← 뒤로가기
+      </button>
+    </header>
+  
+    <main class="max-w-4xl mx-auto p-6">
+      <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">📢 법령 업데이트 목록</h2>
+  
+        <!-- 알림 1 -->
+        <div class="border border-gray-200 p-4 rounded-lg mb-4">
+          <h3 class="text-lg font-semibold text-blue-600">식품위생법 개정</h3>
+          <p class="text-sm text-gray-500 mb-1">날짜: 2025-04-10</p>
+          <p class="mb-2">나트륨 기준 <strong>600mg → 500mg</strong> 으로 강화</p>
+          <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-all">상세 보기</button>
+        </div>
+  
+        <!-- 알림 2 -->
+        <div class="border border-gray-200 p-4 rounded-lg mb-4">
+          <h3 class="text-lg font-semibold text-blue-600">식품공전 수정</h3>
+          <p class="text-sm text-gray-500 mb-1">날짜: 2025-04-01</p>
+          <p class="mb-2">두류가공품에 <strong>대장균군 기준</strong> 추가</p>
+          <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-all">상세 보기</button>
+        </div>
+  
+        <div class="text-center mt-6">
+          <button class="bg-yellow-400 text-white px-6 py-2 rounded-lg hover:bg-yellow-500 transition-all">
+            🔔 알림 설정
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <script>
+    function showSection(sectionId) {
+      document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+      });
+      const targetSection = document.getElementById(sectionId);
+      targetSection.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      console.log(`Switched to section: ${sectionId}`);
+    }
+  
+    document.addEventListener('DOMContentLoaded', () => {
+      showSection('dashboard');
+    });
+  
+    // 로그인 상태 변수
+    let isLoggedIn = true;
+  
+    // 로그아웃 시 동작
+    function logout() {
+      isLoggedIn = false;
+      const authBtn = document.getElementById('authButton');
+      authBtn.innerText = '로그인';
+      authBtn.setAttribute('onclick', "showSection('loginPage')");
+      console.log("로그아웃됨");
+    }
+  
+    // 로그인 시 동작
+    function login() {
+      isLoggedIn = true;
+      const authBtn = document.getElementById('authButton');
+      authBtn.innerText = '로그아웃';
+      authBtn.setAttribute('onclick', "logout()");
+      showSection('dashboard');
+      console.log("로그인됨");
+    }
+  </script>
+  
+  <!-- 프로필 페이지 -->
+<div id="profilePage" class="section">
+    <header class="bg-white shadow-sm p-4 flex justify-between items-center">
+      <div class="text-2xl font-bold text-blue-600 drop-shadow-sm">[로고: FoodLaw]</div>
+      <button onclick="showSection('dashboard')" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-all">
+        ← 홈으로
+      </button>
+    </header>
+  
+    <main class="max-w-2xl mx-auto p-6">
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">👤 프로필</h2>
+        <p><strong>이름:</strong> 홍길동</p>
+        <p><strong>이메일:</strong> test@example.com</p>
+        <p><strong>역할:</strong> 관리자</p>
+      </div>
+    </main>
+  </div>
+  
+  <!-- 로그인 페이지 -->
+  <div id="loginPage" class="section">
+    <header class="bg-white shadow-sm p-4 flex justify-between items-center">
+      <div class="text-2xl font-bold text-blue-600 drop-shadow-sm">[로고: FoodLaw]</div>
+    </header>
+  
+    <main class="max-w-md mx-auto p-6">
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">🔐 로그인</h2>
+        <input type="email" placeholder="이메일" class="w-full mb-3 p-2 border border-gray-300 rounded" />
+        <input type="password" placeholder="비밀번호" class="w-full mb-3 p-2 border border-gray-300 rounded" />
+        <button onclick="login()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-all w-full">
+          로그인
+        </button>
+      </div>
+    </main>
+  </div>
+  
+</body>
+</html>
